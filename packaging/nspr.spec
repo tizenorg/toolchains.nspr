@@ -9,6 +9,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-root
 Source0:        https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v%{version}/src/%{name}-%{version}.tar.gz
 Source1:        nspr.pc.in
 Source2:        nspr-config-vars.in
+Source1001: packaging/nspr.manifest 
 
 Patch1:         nspr-config-pc.patch
 Patch2:         pr-wait-cond-var-seconds.patch
@@ -46,6 +47,7 @@ cp ./mozilla/nsprpub/config/nspr-config.in ./mozilla/nsprpub/config/nspr-config-
 cp %{SOURCE2} ./mozilla/nsprpub/config/
 
 %build
+cp %{SOURCE1001} .
 
 ./mozilla/nsprpub/configure \
                  --prefix=%{_prefix} \
@@ -112,12 +114,14 @@ done
 %postun -p /sbin/ldconfig
 
 %files
+%manifest nspr.manifest
 %defattr(-,root,root)
 /%{_lib}/libnspr4.so
 /%{_lib}/libplc4.so
 /%{_lib}/libplds4.so
 
 %files devel
+%manifest nspr.manifest
 %defattr(-, root, root)
 %{_libdir}/libnspr4.so
 %{_libdir}/libplc4.so
