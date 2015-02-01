@@ -54,7 +54,7 @@ cp %{SOURCE2} ./mozilla/nsprpub/config/
                  --enable-optimize="$RPM_OPT_FLAGS" \
                  --disable-debug
 
-make
+make %{?_smp_mflags}
 
 %install
 
