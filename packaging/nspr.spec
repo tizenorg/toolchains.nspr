@@ -1,6 +1,6 @@
 Summary:        Netscape Portable Runtime
 Name:           nspr
-Version:        4.8.7
+Version:        4.9
 Release:        1
 License:        MPLv1.1 or GPLv2+ or LGPLv2+
 URL:            http://www.mozilla.org/projects/nspr/
@@ -9,10 +9,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-root
 Source0:        https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v%{version}/src/%{name}-%{version}.tar.gz
 Source1:        nspr.pc.in
 Source2:        nspr-config-vars.in
-Source1001: packaging/nspr.manifest 
-
-Patch1:         nspr-config-pc.patch
-Patch2:         pr-wait-cond-var-seconds.patch
 
 %description
 NSPR provides platform independence for non-GUI operating system 
@@ -41,13 +37,12 @@ Header files for doing development with the Netscape Portable Runtime.
 # that go into nspr.pc for pkg-config.
 
 cp ./mozilla/nsprpub/config/nspr-config.in ./mozilla/nsprpub/config/nspr-config-pc.in
-%patch1 -p0
-%patch2 -p1
+#%patch1 -p0
+#%patch2 -p1
 
 cp %{SOURCE2} ./mozilla/nsprpub/config/
 
 %build
-cp %{SOURCE1001} .
 
 ./mozilla/nsprpub/configure \
                  --prefix=%{_prefix} \
@@ -59,7 +54,7 @@ cp %{SOURCE1001} .
                  --enable-optimize="$RPM_OPT_FLAGS" \
                  --disable-debug
 
-make
+make %{?_smp_mflags}
 
 %install
 
@@ -73,8 +68,8 @@ NSPR_CFLAGS=`./config/nspr-config --cflags`
 NSPR_VERSION=`./config/nspr-config --version`
 %{__mkdir_p} $RPM_BUILD_ROOT/%{_libdir}/pkgconfig
 
-cat ./config/nspr-config-vars > \
-                     $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/nspr.pc
+#cat ./config/nspr-config-vars > \
+#                     $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/nspr.pc
 
 cat %{SOURCE1} | sed -e "s,%%libdir%%,%{_libdir},g" \
                      -e "s,%%prefix%%,%{_prefix},g" \
@@ -87,7 +82,7 @@ cat %{SOURCE1} | sed -e "s,%%libdir%%,%{_libdir},g" \
 
 %{__mkdir_p} $RPM_BUILD_ROOT/%{_bindir}
 %{__mkdir_p} $RPM_BUILD_ROOT/%{_lib}
-%{__cp} ./config/nspr-config-pc $RPM_BUILD_ROOT/%{_bindir}/nspr-config
+%{__cp} ./config/nspr-config $RPM_BUILD_ROOT/%{_bindir}/nspr-config
 
 # Get rid of the things we don't want installed (per upstream)
 %{__rm} -rf \
@@ -105,6 +100,8 @@ do
   ln -sf ../../%{_lib}/$file $RPM_BUILD_ROOT/%{_libdir}/$file
 done
 
+mkdir -p %{buildroot}/usr/share/license
+cp -f ./mozilla/nsprpub/pkg/solaris/common_files/copyright %{buildroot}/usr/share/license/%{name}
 
 %clean
 %{__rm} -Rf $RPM_BUILD_ROOT
@@ -114,14 +111,13 @@ done
 %postun -p /sbin/ldconfig
 
 %files
-%manifest nspr.manifest
 %defattr(-,root,root)
 /%{_lib}/libnspr4.so
 /%{_lib}/libplc4.so
 /%{_lib}/libplds4.so
+/usr/share/license/%{name}
 
 %files devel
-%manifest nspr.manifest
 %defattr(-, root, root)
 %{_libdir}/libnspr4.so
 %{_libdir}/libplc4.so

@@ -133,13 +133,15 @@ long __cdecl _InterlockedExchangeAdd(long volatile *Addend, long Value);
         (_InterlockedExchangeAdd((long volatile *)(ptr), (long)(val)) + (val))
 
 #elif ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1)) && \
-      ((defined(DARWIN) && \
+      ((defined(__APPLE__) && \
            (defined(__ppc__) || defined(__i386__) || defined(__x86_64__))) || \
-       (defined(LINUX) && \
+       (defined(__linux__) && \
            ((defined(__i386__) && \
            defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)) || \
            defined(__ia64__) || defined(__x86_64__) || \
            (defined(__powerpc__) && !defined(__powerpc64__)) || \
+           (defined(__arm__) && \
+           defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)) || \
            defined(__alpha))))
 
 /*

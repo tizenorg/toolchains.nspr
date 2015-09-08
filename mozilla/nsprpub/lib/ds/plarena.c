@@ -129,7 +129,15 @@ PR_IMPLEMENT(void) PL_InitArenaPool(
     pool->first.base = pool->first.avail = pool->first.limit =
         (PRUword)PL_ARENA_ALIGN(pool, &pool->first + 1);
     pool->current = &pool->first;
-    pool->arenasize = size;                                  
+    /*
+     * Compute the net size so that each arena's gross size is |size|.
+     * sizeof(PLArena) + pool->mask is the header and alignment slop
+     * that PL_ArenaAllocate adds to the net size.
+     */
+    if (size > sizeof(PLArena) + pool->mask)
+        pool->arenasize = size - (sizeof(PLArena) + pool->mask);
+    else
+        pool->arenasize = size;
 #ifdef PL_ARENAMETER
     memset(&pool->stats, 0, sizeof pool->stats);
     pool->stats.name = strdup(name);
@@ -314,8 +322,8 @@ PR_IMPLEMENT(void) PL_ArenaRelease(PLArenaPool *pool, char *mark)
 {
     PLArena *a;
 
-    for (a = pool->first.next; a; a = a->next) {
-        if (PR_UPTRDIFF(mark, a->base) < PR_UPTRDIFF(a->avail, a->base)) {
+    for (a = &pool->first; a; a = a->next) {
+        if (PR_UPTRDIFF(mark, a->base) <= PR_UPTRDIFF(a->avail, a->base)) {
             a->avail = (PRUword)PL_ARENA_ALIGN(pool, mark);
             FreeArenaList(pool, a, PR_FALSE);
             return;
