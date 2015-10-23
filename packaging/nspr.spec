@@ -2,7 +2,7 @@ Summary:        Netscape Portable Runtime
 Name:           nspr
 Version:        4.9
 Release:        1
-License:        MPLv1.1 or GPLv2+ or LGPLv2+
+License:        MPL-1.1 or GPL-2.0+ or LGPL-2.1+
 URL:            http://www.mozilla.org/projects/nspr/
 Group:          System/Libraries
 BuildRoot:      %{_tmppath}/%{name}-%{version}-root
@@ -101,7 +101,7 @@ do
 done
 
 mkdir -p %{buildroot}/usr/share/license
-cp -f ./mozilla/nsprpub/pkg/solaris/common_files/copyright %{buildroot}/usr/share/license/%{name}
+cp LICENSE %{buildroot}/usr/share/license/%{name}
 
 %clean
 %{__rm} -Rf $RPM_BUILD_ROOT
